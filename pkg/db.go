@@ -18,11 +18,9 @@ func CreateDbInstance() Database {
 	return Database{}
 }
 
-// Open function opens a database connection using Database struct parameters
-// Set the DB property of the struct
-// Return error | nil
-func (d *Database) Open() error {
-	db, err := gorm.Open("sqlite3", "database.db")
+// Open function opens a database connection
+func (d *Database) Open(dbpath string) error {
+	db, err := gorm.Open("sqlite3", dbpath)
 	if err != nil {
 		log.Fatalf("error opening sqlite connection. err: %v", err)
 		return err
