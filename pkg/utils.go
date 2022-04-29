@@ -4,11 +4,13 @@ import (
 	"crypto/sha256"
 	"crypto/subtle"
 	"encoding/base64"
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"text/template"
 )
 
 // GetSetting checks for environment variables in system
@@ -82,4 +84,54 @@ func GetPaymentFromRequest(req *http.Request) (*Payment, error) {
 	payment = output.(Payment)
 	log.Println(payment)
 	return &payment, nil
+}
+
+func GenerateXML(payment Payment, bankfolder string) error {
+	tplpath := "./resources/template"
+
+	tpl, err := template.ParseFiles(tplpath)
+	if err != nil {
+		return err
+	}
+
+	f, err := os.Create(fmt.Sprintf("./%s/%s.xml", bankfolder, payment.IdempotencyUK))
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	err = tpl.Execute(f, payment)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+type BankResponse struct {
+	Id     string
+	Status string
+}
+
+func GetBankResponse() (BankResponse, error) {
+	csvFile, err := os.Open("./resources/bank_response.csv")
+	if err != nil {
+		return BankResponse{}, err
+	}
+	defer csvFile.Close()
+
+	csvLines, err := csv.NewReader(csvFile).ReadAll()
+	if err != nil {
+		return BankResponse{}, err
+	}
+
+	for i, line := range csvLines {
+		if i == 1 {
+			return BankResponse{
+				Id:     line[0],
+				Status: line[1],
+			}, nil
+		}
+	}
+	return BankResponse{}, nil
 }
