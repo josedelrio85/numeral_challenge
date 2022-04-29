@@ -1,0 +1,3 @@
+REQUEST_SCHEMA=resources/request_schema.json
+BANK_FOLDER=bank
+SQLITE_DB_FILE_LOCATION=database.db
