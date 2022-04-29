@@ -8,11 +8,37 @@ import (
 	numeral "github.com/josedelrio85/numeral_challenge/pkg"
 )
 
+// var envvars numeral.EnvVars
+var handler numeral.Handler
+
+func init() {
+	REQUEST_SCHEMA, err := numeral.GetSetting("REQUEST_SCHEMA")
+	if err != nil {
+		log.Fatal(err)
+	}
+	BANK_FOLDER, err := numeral.GetSetting("BANK_FOLDER")
+	if err != nil {
+		log.Fatal(err)
+	}
+	SQLITE_DB_FILE_LOCATION, err := numeral.GetSetting("SQLITE_DB_FILE_LOCATION")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	handler = numeral.Handler{
+		EnvVars: numeral.EnvVars{
+			RequestSchema:    REQUEST_SCHEMA,
+			BankFolder:       BANK_FOLDER,
+			SqliteDbLocation: SQLITE_DB_FILE_LOCATION,
+		},
+	}
+}
+
 func main() {
 	log.Println("Numeral Go Coding Challenge starting...")
 
 	db := numeral.CreateDbInstance()
-	err := db.Open()
+	err := db.Open(handler.EnvVars.SqliteDbLocation)
 	if err != nil {
 		log.Fatalf(err.Error())
 	}
@@ -22,7 +48,6 @@ func main() {
 		log.Fatalf("error creating the table. err: %s", err)
 	}
 
-	handler := numeral.Handler{}
 	handler.Database = db
 
 	router := mux.NewRouter()
