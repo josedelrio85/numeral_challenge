@@ -1,0 +1,11 @@
+# Exclude everything:
+#
+*
+
+# Now un-exclude the resources you need on the docker image:
+#
+!pkg
+!vendor
+!main.go
+!go.mod
+!go.sum
